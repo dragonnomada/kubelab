@@ -1,0 +1,39 @@
+kind: Cluster
+
+apiVersion: kind.x-k8s.io/v1alpha4
+
+networking:
+  apiServerAddress: "0.0.0.0"
+  disableDefaultCNI: TRUE
+
+kubeadmConfigPatches:
+  - |
+    apiVersion: kubeadm.k8s.io/v1beta2
+    kind: ClusterConfiguration
+    metadata:
+      name: config
+    networking:
+      serviceSubnet: "10.96.0.1/12"
+      podSubnet: "192.168.0.0/16"
+      
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 31123
+        hostPort: 31123
+        listenAddress: "0.0.0.0"
+        protocol: tcp
+  - role: control-plane
+  - role: control-plane
+  - role: worker
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 6001
+  - role: worker
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 6002
+  - role: worker
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 6003

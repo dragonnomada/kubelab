@@ -1,0 +1,128 @@
+##############################################################
+# Kubernetes Lab                                         101 #
+# ---------------------------------------------------------- #
+# Alan Badillo Salas               dragonnomada123@gmail.com #
+# ---------------------------------------------------------- #
+# https://github.com/dragonnomada/kubelab           oct/2022 #
+##############################################################
+
+[ LECTURES ]
+
+- https://dustinspecker.com/posts/using-docker-to-resolve-
+  kubernetes-services-in-a-kind-cluster/
+
++++ KinD - Resolve Kubernetes Services +++++++++++++++++++++++
+
+[ Verify host DNS configuration ] 
+
+$ systemd-resolve --status | grep 'DNS Servers' --after 5
+
+[ Create KinD cluster ]
+
+$ kind create cluster
+
+$ kubectl get po -A
+
+[ Run kubectl service ]
+
+$ kubectl run hello-nginx-pod --expose --image nginx --port 80
+
+$ kubectl get po,svc
+
+[ Inspect docker container ]
+
+$ docker ps -a
+
+$ kubectl exec -it kind-control-plane -- bash
+
+root@kind-control-plane:/# curl 10.96.127.20
+
+[ Inspect kubernete pod ]
+
+$ kubectl get po
+
+$ kubectl exec -it hello-nginx -- bash
+
+root@hello-nginx:/# curl 10.96.127.20
+
+[ Inspect Docker Network ]
+
+$ docker network ls
+
+$ docker network inspect \
+    --format "{{.Name}} {{.Driver}}" kind
+
+$ docker network inspect \
+    --format "{{json .IPAM.Config}}" kind | jq
+
+$ docker network inspect \
+    --format "{{json .Containers}}" kind | jq
+
+$ docker container inspect kind-control-plane \
+    --format '{{ .NetworkSettings.Networks.kind.IPAddress }}'
+
+[ Run test docker container ]
+
+$ docker run \
+    --rm --detach \
+    --name echo-env
+    --net kind \
+    --cap-add NET_ADMIN \
+    --dns 10.96.0.10 \
+    --dns-search svc.cluster.local \
+    --dns-search cluster.local \
+    dragonnomada/echo-env
+
+$ docker ps -a
+
+$ docker exec -it echo-env sh
+
+/app # ping google.com
+
+>>> ping: bad address 'google.com'
+
+[ Update test docker container IP route ]
+
+$ docker container inspect kind-control-plane \
+    --format '{{ .NetworkSettings.Networks.kind.IPAddress }}'
+
+>>> 172.18.0.2
+
+$ docker exec \
+    -it echo-env \
+    ip route add 10.96.0.0/12 via <<172.18.0.2>>
+
+[ Check test docker container network on kubernete cluster ]
+
+$ docker exec -it echo-env sh
+
+/app # ping google.com
+
+/app # apk add curl
+
+/app # curl localhost
+
+/app # curl http://hello-nginx.default.svc.cluster.local
+
+[ Check main docker container (kubernete pod) ]
+
+$ kubectl exec -it hello-nginx -- bash
+
+root@hello-nginx:/# curl localhost
+root@hello-nginx:/# HOST=http://hello-nginx.default
+root@hello-nginx:/# curl $HOST
+root@hello-nginx:/# curl "$HOST.svc.cluster.local"
+
+root@hello-nginx:/# apt update
+root@hello-nginx:/# apt install jq
+
+root@hello-nginx:/# curl 172.18.0.3 2>/dev/null | jq
+root@hello-nginx:/# curl echo-env 2>/dev/null | jq
+
+[ Add port forwarding to kubernete service ]
+
+[1] $ kubectl get svc
+
+[1] $ kubectl port-forward hello-nginx 8080:80
+
+[2] $ curl localhost:8080

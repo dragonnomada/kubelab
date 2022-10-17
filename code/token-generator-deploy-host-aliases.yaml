@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: token-generator-deploy
+
+spec:
+  selector:
+    matchLabels:
+      app: token-generator-app
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: token-generator-app
+    spec:
+      containers:
+        - name: token-generator-container
+          image: dragonnomada/token-generator
+          ports:
+            - containerPort: 80
+              hostPort: 3000
+      hostAliases:
+        - ip: 127.0.0.1
+          hostnames:
+            - token.local

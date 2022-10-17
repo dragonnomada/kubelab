@@ -1,0 +1,87 @@
+##############################################################
+# Kubernetes Lab                                         102 #
+# ---------------------------------------------------------- #
+# Alan Badillo Salas               dragonnomada123@gmail.com #
+# ---------------------------------------------------------- #
+# https://github.com/dragonnomada/kubelab           oct/2022 #
+##############################################################
+
+[LECTURES]
+
+- https://www.cloudaccess.net/cloud-control-panel-ccp/157-dns-
+  management/322-subnet-masks-reference-table.html
+- https://docs.oracle.com/es-ww/iaas/Content/ContEng/Concepts/
+  contengcidrblocks.htm
+- https://kubernetes.io/docs/setup/production-environment/tool
+  s/kubeadm/control-plane-flags/
+- https://projectcalico.docs.tigera.io/getting-started/kuberne
+  tes/self-managed-onprem/onpremises
+
++++ KinD create multi-cluster ++++++++++++++++++++++++++++++++
+
+=== cluster101.yaml ==========================================
+
+kind: Cluster
+
+apiVersion: kind.x-k8s.io/v1alpha4
+
+networking:
+  apiServerAddress: "0.0.0.0"
+  disableDefaultCNI: TRUE
+
+kubeadmConfigPatches:
+  - |
+    apiVersion: kubeadm.k8s.io/v1beta2
+    kind: ClusterConfiguration
+    metadata:
+      name: config
+    networking:
+      serviceSubnet: "10.96.0.1/12"
+      podSubnet: "192.168.0.0/16"
+      
+nodes:
+  - role: control-plane
+  - role: worker
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 80
+      - containerPort: 443
+        hostPort: 443
+    extraMounts:
+      - hostPath: /usr/src
+        containerPath: /usr/src
+
+==============================================================
+
+$ kind create cluster --name cluster101 \
+    --config cluster101.yaml
+
++++ Calico install +++++++++++++++++++++++++++++++++++++++++++
+
+%%% Check pending state %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$ kubectl get po,rs,deploy,svc,no,ep -A
+
+* kubectl logs -p -n kube-system <pod-name>
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Update netfilter proxy connections %%%%%%%%%%%%%%%%%%%%%%%
+
+$ sudo sysctl -w net.netfilter.nf_conntrack_max=262144
+$ sudo cat /proc/sys/net/netfilter/nf_conntrack_max
+$ sudo echo 'net.netfilter.nf_conntrack_max=262144' \
+  >> /etc/sysctl.conf
+
+* kubectl rollout restart deployment coredns -n kube-system
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$ calico_url="https://raw.githubusercontent.com/projectcalico"
+$ calico_url+="/calico/v3.24.1/manifests/calico.yaml"
+$ kubectl apply -f $calico_url
+
+
+
+
+
