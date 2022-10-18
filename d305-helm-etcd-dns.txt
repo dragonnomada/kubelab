@@ -1,0 +1,61 @@
+##############################################################
+# Kubernetes Lab                                         105 #
+# ---------------------------------------------------------- #
+# Alan Badillo Salas               dragonnomada123@gmail.com #
+# ---------------------------------------------------------- #
+# https://github.com/dragonnomada/kubelab           oct/2022 #
+##############################################################
+
+[ LECTURES ]
+
+- https://helm.sh/docs/intro/install/
+
++++ Install Helm +++++++++++++++++++++++++++++++++++++++++++++
+
+$ curl -fsSL -o get_helm.sh https://raw.githubusercontent.com
+  /helm/helm/main/scripts/get-helm-3
+
+$ chmod 700 get_helm.sh
+
+$ ./get_helm.sh
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
++++ Install etcd-operator ++++++++++++++++++++++++++++++++++++
+
+$ helm repo add stable https://charts.helm.sh/stable
+
+$ helm install etcd-dns stable/etcd-operator \
+  --set customResources.createEtcdClusterCRD=true \
+  --namespace kube-system 
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+=== simple-pool-adv-l2.yaml ==================================
+
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: example
+  namespace: metallb-system
+spec:
+  addresses:
+  - 192.168.10.0/24
+  - 192.168.9.1-192.168.9.5
+  - fc00:f853:0ccd:e799::/124
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: empty
+  namespace: metallb-system
+
+==============================================================
+
+%%% Check External IP works %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$ kubectl get po,rs,deploy,svc,no,ep -o wide -A
+
+$ docker exec -it <control-plane> curl <external-ip>:8080
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
