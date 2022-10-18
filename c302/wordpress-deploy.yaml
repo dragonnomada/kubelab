@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: wordpress-deploy
+
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: wordpress-app
+  template:
+    metadata:
+      name: wordpress-pod
+      labels:
+        app: wordpress-app
+    spec:
+      containers:
+        - name: wordpress-pod
+          image: wordpress
+          env:
+            - name: WORDPRESS_DB_HOST
+              # v1: Colocamos el Cluster IP del servicio
+              #value: "10.96.5.1"
+              # v2: Colocamos el DNS generado para el servicio
+              value: mysql-service
+            - name: WORDPRESS_DB_USER
+              value: wordpress
+            - name: WORDPRESS_DB_PASSWORD
+              value: "wordpress$123"
+            - name: WORDPRESS_DB_NAME
+              value: wordpress
+          ports:
+            - containerPort: 80
