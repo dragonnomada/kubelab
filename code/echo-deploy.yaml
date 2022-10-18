@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: echo-deploy
+
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      pod: hello-pod
+  template:
+    metadata:
+      name: hello-pod
+      labels:
+        pod: hello-pod
+    spec:
+      containers:
+        - name: echo-app
+          image: dragonnomada/echo-env
+          ports:
+            - containerPort: 80 
+

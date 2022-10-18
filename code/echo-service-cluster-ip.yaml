@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: echo-service
+
+spec:
+  type: ClusterIP
+  selector:
+    pod: hello-pod
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 80
+    - name: https
+      protocol: TCP
+      port: 4433
+      targetPort: 443

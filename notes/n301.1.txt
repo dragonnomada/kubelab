@@ -1,0 +1,39 @@
+Pod
+
+Node: <worker>/<node-ip> (HOST)
+IP: -> <pod-ip> Kube Proxy
+
+<pod-ip>:<container-port>
+<node-ip>:<host-port>
+
+<node-ip> ~ eth0 (Machine IP)
+<pod-ip> ~ Kube Proxy (Subred)
+
+<pod-ip>:8080 -> <node-ip>:3000
+
+DENTRO DEL CONTENEDOR:
+  curl localhost:8080 -> <<RESULT>>
+
+DENTRO DEL HOST (FUERA DEL CONTENEDOR)
+  curl localhost:3000 -> <<RESULT>>
+
+EN OTRO NODO (FUERA DEL HOST / DENTRO DEL CLÚSTER):
+  curl <node-ip>:3000 -> <<RESULT>>
+---
+
+Containers:
+  hello-container:
+    Container ID:   containerd://7b1...0ae
+    Image:          dragonnomada/hello-server
+    Image ID:       docker.io/dragonnomada/hello-server@sha256:...
+    Port:           8080/TCP
+    Host Port:      3000/TCP
+    State:          Running
+      Started:      Mon, 17 Oct 2022 15:56:40 +0000
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/...
+
+

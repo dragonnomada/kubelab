@@ -1,0 +1,13 @@
+Subnet
+
+Rangos (Máscaras de subred / gateways)
+
+/0
+
+/2 -> SIN SUBRED
+
+/4 -> x.x.x.0 x.x.x.1 x.x.x.2 ... x.x.x.15 
+
+/16 -> x.x.x.0 x.x.x.1 x.x.x.2 ... x.x.x.255
+
+/32 ->  x.x.0.0 x.x.0.1 x.x.0.2 ... x.x.255.255

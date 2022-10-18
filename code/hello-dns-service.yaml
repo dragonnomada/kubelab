@@ -1,0 +1,9 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: hello-dns-service
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: hello1.example.org,hello2.example.org
+spec:
+  type: ExternalName
+  externalName: hello.example.org
