@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: token-deploy
+
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: token-app
+  template:
+    metadata:
+      name: token-pod
+      labels:
+        app: token-app
+    spec:
+      containers:
+        - name: token-container
+          image: dragonnomada/token-generator
+          ports:
+            - containerPort: 80
