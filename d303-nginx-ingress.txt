@@ -54,7 +54,15 @@ $ kubectl get ingress
 
 +++ Expose Nginx ingress controller port +++++++++++++++++++++
 
-$ kubectl get po -n ingress-nginx | grep controller
+--- NOTA: Modificar el /etc/hosts ----------------------------
+
+$ sudo nano /etc/hosts
+
+...
+127.0.0.1 localhost demo.localdev.me
+...
+
+--------------------------------------------------------------
 
 [1] $ kubectl port-forward -n ingress-nginx \
   service/ingress-nginx-controller 8080:80
@@ -62,6 +70,8 @@ $ kubectl get po -n ingress-nginx | grep controller
 [2] $ curl demo.localdev.me:8080
 
 %%% Join into ingress controller %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$ kubectl get po -n ingress-nginx | grep controller
 
 $ kubectl exec -it -n ingress-nginx \
   ingress-nginx-controller-<xxxx> -- bash
