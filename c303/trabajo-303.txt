@@ -30,7 +30,7 @@ $ kubectl get po -o wide --show-labels
 # nginx-pod        1/1     Running   0          2m13s   10.244.1.6   cluster304-worker    <none>           <none>            app=nginx-app
 
 # 3. Diseñar los Service para exponer los Pods en un ClusterIP
-
+docker exec -it cluster304-control-plane curl 10.96.20.1
 $ kubectl create -f - <<EOF
 kind: Service
 apiVersion: v1
@@ -61,10 +61,33 @@ EOF
 
 # 4. Probar los servicios sobre el Control Plane
 
+$ kubectl get po,svc --show-labels
+
 $ docker exec -it cluster304-control-plane curl 10.96.20.1
 
 $ docker exec -it cluster304-control-plane curl 10.96.30.1
 
+# 5. Exponer un servicio basado en los DNS del Host (External Name)
+
+$ kubectl create -f - <<EOF
+kind: Service
+apiVersion: v1
+metadata:
+  name: frontend-service
+spec:
+  type: ExternalName
+  externalName: frontend.empresa.com
+EOF
+
+$ sudo nano /etc/hosts
+
+# 10.96.X.1 frontend.empresa.com
+
+$ kubectl exec nginx-pod -- curl frontend-service
+
+# 6. Probar que el servicio frontend-service apunte correctamente
+
+$ kubectl exec nginx-pod -- curl frontend-service
 
 
 
