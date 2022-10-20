@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Kubernetes</title>
+</head>
+<body>
+    
+    <!-- <button onclick="loadResources()">Load Resources</button> -->
+
+    <table>
+        <thead>
+            <tr>
+                <th>Kind</th>
+                <th>Name</th>
+                <th>Namaspaced</th>
+                <th>Verbs</th>
+            </tr>
+        </thead>
+        <tbody id="resources-list">
+            <!-- <tr>
+                <td>Pod</td>
+                <td>pod</td>
+                <td>true</td>
+                <td>[create, delete, ...]</td>
+            </tr> -->
+        </tbody>
+    </table>
+
+    <script>
+        async function loadResources() {
+            const url = "https://34.139.237.233:6443/api/v1"
+            const token = `eyJhbGciOiJSUzI1NiIsImtpZCI6IllaM2JQOFU0VHZuSm10el9rW
+                            jE4b2pKWHhqNG9ZRjFVUnplMVBFMHlEZzQifQ.eyJhdWQiOlsiaH
+                            R0cHM6Ly9rdWJlcm5ldGVzLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG
+                            9jYWwiXSwiZXhwIjoxNjY2MjkwMTgzLCJpYXQiOjE2NjYyODY1OD
+                            MsImlzcyI6Imh0dHBzOi8va3ViZXJuZXRlcy5kZWZhdWx0LnN2Yy
+                            5jbHVzdGVyLmxvY2FsIiwia3ViZXJuZXRlcy5pbyI6eyJuYW1lc3
+                            BhY2UiOiJkZWZhdWx0Iiwic2VydmljZWFjY291bnQiOnsibmFtZS
+                            I6ImJvdC1zYSIsInVpZCI6IjFiZTJkNTRlLTdlMDktNDgyMy04Zj
+                            M0LWU3YWI4NDU5ZTJlZiJ9fSwibmJmIjoxNjY2Mjg2NTgzLCJzdW
+                            IiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6ZGVmYXVsdDpib3Qtc2
+                            EifQ.e6gkPwOJ95GDfZMgu82WRdgtp3TkGOeFflJ6vaL9s-bKKHf
+                            dqAOAhs4z4trcF8j9m7sMrpszXJ6cxndDwnRgJtJIe-TvsmtVTai
+                            1YnCZVgA-z-W9slhCJaWv1EkDh9L-5T-CZ7MR8xHXhlTBmPr7-uk
+                            b4zppme7ex1GcY5Ltvin2nkoTddBSagBy-7tk_MVYg8li9QFH2CJ
+                            KX9Ijo4QqgdDDzVE1nWNUf-62dS-m8LIL7z951n4lklxuNhFp-kJ
+                            3oSytFrrqKaW7-IiK6ZkpHBGIvMRhRb5Tv84rZLAJiawMc7EnPcs
+                            ChYW0E7VX1OpNhNp4oTkaM35Ew4yHpRs2Fw`.replace(/[\s\t\n]/g, "")
+
+            const response = await fetch(url, {
+                method: "get",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                mode: 'cors'
+            })
+
+            const result = await response.json()
+
+            console.log(result)
+
+            // {
+            //     "name": "bindings",
+            //     "singularName": "",
+            //     "namespaced": true,
+            //     "kind": "Binding",
+            //     "verbs": [
+            //         "create"
+            //     ]
+            // }
+
+            for (let resource of result.resources) {
+                const { name, namespaced, kind, verbs } = resource
+                console.log(name, namespaced, kind, verbs)
+                const tr = document.createElement("tr")
+                tr.innerHTML = `
+                    <td>${kind}</td>
+                    <td style='font-weight:600'>${name}</td>
+                    <td style='color:${namespaced ? "green" : "red"}'>${namespaced}</td>
+                    <td>${verbs.join(", ")}</td>
+                `
+                document.getElementById("resources-list").append(tr)
+            }
+        }
+
+        loadResources()
+    </script>
+
+</body>
+</html>

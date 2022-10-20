@@ -12,6 +12,10 @@
 @                                                            @
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+[ LECTURAS ]
+
+- https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/
+
 La Auditoría en Kubernetes es la forma de trazar lo que está
 ocurriendo en el clúster desde la perspectiva del API.
 
@@ -43,7 +47,7 @@ rules:
     verbs: ["update","patch"]
     resources:
       - group: "" # core
-    resources: ["nodes/status", "pods/status"]
+        resources: ["nodes/status", "pods/status"]
     omitStages:
       - "RequestReceived"
 
@@ -127,12 +131,12 @@ spec:
   volumes:
     ...
     - hostPath:
-      path: /var/log/k8s
-      type: DirectoryOrCreate
+        path: /var/log/k8s
+        type: DirectoryOrCreate
       name: var-log-k8s
     - hostPath:
-      path: /etc/kubernetes/audit
-      type: DirectoryOrCreate
+        path: /etc/kubernetes/audit
+        type: DirectoryOrCreate
       name: etc-kubernetes-audit
   ...
 
