@@ -1,0 +1,3 @@
+curl --insecure --location --request \
+  GET "https://<host-ip>:<api-port>/api' \
+  --header 'Authorization: Bearer $TOKEN"

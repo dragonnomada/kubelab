@@ -1,0 +1,23 @@
+POD               ->     SERVICE         CLUSTER-IP
+
+MYSQL.dev         -> mysql-db-dev        10.96.15.1
+MYSQL.test        -> mysql-db-test       10.96.15.2
+MYSQL.backup      -> mysql-db-backup     10.96.15.3
+MYSQL.prod        -> mysql-db-prod       10.96.15.4
+
+WORDPRESS         -> mysql-dns           mysql.empresa.com
+
+DNS /etc/hosts
+
+10.96.15.4 mysql.empresa.com
+
+POD               ->     SERVICE         CLUSTER-IP
+
+TOKEN.dev         -> token-dev           10.96.3.1
+TOKEN.prod        -> token-prod          10.96.4.1
+
+...               -> token-dns           token.empresa.com
+
+DNS /etc/hosts
+
+10.96.3.1            token.empresa.com

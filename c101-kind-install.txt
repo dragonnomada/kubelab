@@ -1,0 +1,50 @@
++++ KinD installation ++++++++++++++++++++++++++++++++++++++++
+
+%%% Docker %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$ sudo snap install docker
+
+$ sudo addgroup --system docker
+$ sudo usermod -aG docker $USER
+$ sudo snap disable docker
+$ sudo snap enable docker
+
+[LOGOUT]
+
+$ docker version
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Kubectl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$ sudo snap install kubectl --classic
+
+$ kubectl version --output yaml
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Go %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$ sudo snap install go --classic
+
+$ echo "GOPATH=$HOME/go" >> ~/.bashrc
+$ echo "export GOPATH" >> ~/.bashrc
+$ echo "PATH=\$PATH:\$GOPATH/bin" >> ~/.bashrc
+$ source ~/.bashrc
+
+$ go version
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% KinD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$ go install sigs.k8s.io/kind@latest
+
+$ kind version
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+

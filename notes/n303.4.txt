@@ -1,0 +1,12 @@
+POD          ->    SERVICE             CLUSTER IP
+
+nginx-pod    ->    nginx-service       10.96.20.1
+httpd-pod    ->    httpd-service       10.96.30.1
+
+                   frontend-dns        frontend.empresa.com
+
+Host-0 /etc/hosts
+
+10.96.20.1 frontend.empresa.com
+-->
+10.96.30.1 frontend.empresa.com

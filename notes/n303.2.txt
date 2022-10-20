@@ -1,0 +1,4 @@
+# $ kubectl create token test-sa
+# $ kubectl describe role test
+# $ kubectl auth can-i get pods --as system:serviceaccount:default:test-sa
+# $ kubectl get sa

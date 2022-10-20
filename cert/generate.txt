@@ -1,0 +1,5 @@
+cat .kube/config | grep client-certificate-data | head -1 | awk '{print $2}' | base64 -d > kubeconfig.crt
+
+cat .kube/config | grep client-key-data | head -1 | awk '{print $2}' | base64 -d > kubeconfig.key
+
+openssl pkcs12 -export -clcerts -inkey kubeconfig.key -in kubeconfig.crt -out kubeconfig.p12 -name "kubernetes-client"

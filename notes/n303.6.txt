@@ -1,0 +1,15 @@
+AUTENTICACIÓN
+
+-> Ingresar/Acceso
+-> Mecanismos Usuario/Grupo
+              CERTIFICADO/TOKEN
+
+- client certificates
+- bearer tokens
+- 
+
+AUTORIZACIÓN
+
+-> Ejecutar/Capacidad
+-> Mecanismos Service-Account
+              ROLES/RBAC
