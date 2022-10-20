@@ -17,6 +17,226 @@ fina los permisos sobre los recursos del clúster.
 
 ... Roles ....................................................
 
+Los roles agrupan permisos en un objeto que es describible
+y configurable. Los roles contienen reglas, las cuales son
+colecciones de recursos y verbos.
+
+• VERBO: La acción que puede ser realizada en el clúster
+         como leer (`get`), escribir (`create`, `update`,
+         `patch` y `delete`) o listar/observar (`list` y
+         `watch`)
+• RECURSOS: Son los nombres de las API a los que se le aplican
+            los verbos, como `pods`, `services`, `edpoints`.
+
+También tenemos los componentes de las reglas.
+
+• `apiGroups`: Una lista de grupos a los que pertenecen los 
+               recursos
+• `resources`: Una lista con el nombre del tipo de recursos y
+               subrecursos
+• `resourceNames`: Una lista opcional de objetos específicos
+                   a los que aplicarle la regla
+
+Los verbos proveen acceso a los recursos identificados.
+
+Se puede usar el caracter `wildcard` para identificar todos 
+los verbos y recursos.
+
+%%% Listar recursos y verbos %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    $ kubectl api-resources -o wide
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+... Identificando un Role ....................................
+
+[ LECTURAS ] 
+
+- https://kubernetes.io
+  /docs/reference/access-authn-authz/rbac/
+- https://docs.bitnami.com/tutorials
+  /configure-rbac-in-your-kubernetes-cluster/
+
+=== example-role.yaml ========================================
+
+    kind: Role
+    apiVersion: rbac.authorization.k8s.io/v1
+
+    metadata:
+      namespace: default
+      name: pod-and-pod-logs-reader
+    
+    rules:
+      - apiGroups: [""]
+        resources: ["pods", "pods/log"]
+        verbs: ["get", "list"]
+
+==============================================================
+
+--- Rutas ----------------------------------------------------
+
+    /api
+    /api/v1
+    /api/v1/namespaces/default/pods
+    /api/v1/namespaces/default/pods/example-pod/log
+
+--------------------------------------------------------------
+
+... Role versus ClusterRole ..................................
+
+Los roles del clúster son libres del espacio de nombres
+(`namespace`) y actua globalmente sobre todos.
+
+=== example-cluster-role.yaml ================================
+
+    kind: ClusterRole
+    apiVersion: rbac.authorization.k8s.io/v1
+
+    metadata:
+      name: cluster-pod-and-pod-logs-reader
+    
+    rules:
+      - apiGroups: [""]
+        resources: ["pods", "pods/log"]
+        verbs: ["get", "list"]
+
+==============================================================
+
+... Roles negativos ..........................................
+
+No existen los roles negativos o de exclusión, estos actuan
+como roles de activación.
+
+• Hay mejor seguridad y simplicidad. Todo se mantiene secreto
+  hasta que es expuesto.
+• No hay consecuencias inintencionadas. No hay puerta abierta
+  para hacer algo que no haya sido concedido.
+
+... Agregación en ClusterRoles ...............................
+
+Podemos extender la definición de un ClusterRole mediante la
+agregación en nuevos ClusterRoles.
+
+Esto mezclará nuevos recursos definidos en el ClusterRole
+extendido, sobre el CustomRole que soporta la agregación
+mediante el `aggregationRule`.
+
+# CRD -> CustomResourceDefinition
+
+=== admin-cluster-role.yaml ==================================
+
+    kind: ClusterRole
+    apiVersion: rbac.authorization.k8s.io/v1
+
+    metadata:
+      name: admin
+      labels:
+        kubernetes.io/bootstrapping: rbac-defaults
+      annotations:
+        rbac.authorization.kubernetes.io/autoupdate: 'true'
+    
+    rules:
+      - apiGroups: [...]
+        resources: [...]
+        verbs: [...]
+
+    aggregationRule:
+      clusterRoleSelectors:
+        - matchLabels:
+            rbac.authorization.k8s.io/aggregate-to-admin: <<<
+            >>> 'true'
+
+==============================================================
+
+=== widget-cluster-role.yaml =================================
+
+    kind: ClusterRole
+    apiVersion: rbac.authorization.k8s.io/v1
+
+    metadata:
+      name: aggregate-widget-to-admin
+      labels:
+        rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    
+    rules:
+      - apiGroups: [...]
+        resources: [...]
+        verbs: [...]
+
+    aggregationRule:
+      clusterRoleSelectors:
+        - matchLabels:
+            rbac.authorization.k8s.io/aggregate-to-admin: <<<
+            >>> 'true'
+
+==============================================================
+
+... RoleBindings y ClusterRoleBindings .......................
+
+Los RoleBindings permiten enlazar Role o ClusterRole en un
+`namespace` específico hacia `serviceaccounts`, usuarios o
+grupos.
+
+Los ClusterRoleBindings permiten enlazar ClusterRole hacia
+`serviceaccounts`, usuarios o grupos.
+
+=== example-role-binding.yaml ================================
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+
+metadata:
+  name: pod-and-pod-logs-reader
+  namespace: default
+
+subjects:
+  - kind: ServiceAccount
+    name: mysa
+    namespace: default
+    apiGroup: rbac.authorization.k8s.io
+  - kind: User
+    name: podreader
+  - kind: Group
+    name: podreaders
+
+roleRef:
+  kind: Role
+  name: pod-and-pod-logs-reader
+  apiGroup: rbac.authorization.k8s.io
+
+==============================================================
+
+=== example-cluster-role-binding.yaml ========================
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+
+metadata:
+  name: cluster-pod-and-pod-logs-reader
+
+subjects:
+  - kind: ServiceAccount
+    name: mysa
+    apiGroup: rbac.authorization.k8s.io
+  - kind: User
+    name: podreader
+  - kind: Group
+    name: podreaders
+
+roleRef:
+  kind: ClusterRole
+  name: luster-pod-and-pod-logs-reader
+  apiGroup: rbac.authorization.k8s.io
+
+==============================================================
+
+• ClusterRole + ClusterRoleBinding = cluster-wide permission
+• ClusterRole + RoleBinding = namespace-specific permission
+
+༼ つ ◕_◕ ༽つ
+
+..............................................................
+
 
 
 
