@@ -8,7 +8,7 @@
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @                                                            @
-@    RBAC - Políticas y Auditoría                            @
+@    RBAC - Políticas y Auditoría (1)                        @
 @                                                            @
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -144,7 +144,7 @@ mediante el `aggregationRule`.
       clusterRoleSelectors:
         - matchLabels:
             rbac.authorization.k8s.io/aggregate-to-admin: <<<
-            >>> 'true'
+                                                    >>> 'true'
 
 ==============================================================
 

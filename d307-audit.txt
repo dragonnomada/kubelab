@@ -1,0 +1,175 @@
+##############################################################
+# Kubernetes Lab                                         307 #
+# ---------------------------------------------------------- #
+# Alan Badillo Salas               dragonnomada123@gmail.com #
+# ---------------------------------------------------------- #
+# https://github.com/dragonnomada/kubelab           oct/2022 #
+##############################################################
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@                                                            @
+@    RBAC - Políticas y Auditoría (2)                        @
+@                                                            @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+La Auditoría en Kubernetes es la forma de trazar lo que está
+ocurriendo en el clúster desde la perspectiva del API.
+
+Este se encuentra en formato JSON haciendo difícil la lectura,
+pero existen herramientas como Elasticsearch, Fluentd y Kibana
+que facilitan y reducen esta complejidad.
+
+... Creación de una política de auditoría ....................
+
+El archivo de política (`audit policy`) dictamina cómo 
+deberían manipularse los logs que están siendo registrados,
+mediante un archivo de log o un webhook.
+
+Una política de auditoría es una colección de reglas que le
+dice al API Server que llamadas al API registrar y cómo.
+
+Las reglas de políticas son leídas secuencialmente y sólo
+si la primera coincide con el evento, son aplicadas subsecuen-
+temente.
+
+=== example-policy.yaml ======================================
+
+kind: Policy
+apiVersion: audit.k8s.io/v1beta1
+
+rules:
+  - level: Request
+    userGroups: ["system:nodes"]
+    verbs: ["update","patch"]
+    resources:
+      - group: "" # core
+    resources: ["nodes/status", "pods/status"]
+    omitStages:
+      - "RequestReceived"
+
+==============================================================
+
+... Niveles de Eventos en la Auditoría .......................
+
+Los niveles permiten registrar logs sobre los eventos.
+
+# <level>
+
+Nivel          | Detalles del Log
+-------------- + -----------------------------------
+None           | No hace ningún log de los datos
+Metadata       | Hace logs de los metadatos
+Request        | Hace logs de metadatos y peticiones
+RequestReponse | Hace logs incluyendo la respuesta
+
+... Estados Omitidos .........................................
+
+Los estados omitidos reducen la carga de registros en estados
+que no sean de interés.
+
+# <omitStages>
+
+Estado           | Detalles
+---------------- + ---------------------------------
+RequestReceived  | El API recive una petición
+ResponseStarted  | La petición comienza a procesarse
+ResponseComplete | El API responde la petición
+Panic            | Ocurre un evento de pánico
+
+... Habilitar la auditación en el clúster ....................
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+--- Copiar el archivo de políticas al Plano de Control -------
+
+$ docker exec -it cluster101-control-plane \
+  mkdir -p /etc/kubernetes/audit
+
+$ docker cp k8s-audit-policy.yaml \
+  cluster101-control-plane:/etc/kubernetes/audit
+
+--- Crear la carpeta de logs en el Plano de Control --------
+
+$ docker exec -it cluster101-control-plane mkdir /var/log/k8s
+
+--- Editar el kube-apiserver.yaml en el Plano de Control -----
+
+$ docker exec -it cluster101-control-plane bash
+
+[101]# nano /etc/kubernetes/manifests/kube-apiserver.yaml
+
+=== /etc/kubernetes/manifests/kube-apiserver.yaml ============
+
+...
+
+spec:
+  containers:
+  - command:
+    ...
+    - --audit-log-path=/var/log/k8s/audit.log
+    - --audit-log-maxage=1
+    - --audit-log-maxbackup=10
+    - --audit-log-maxsize=10
+    - --audit-policy-file=/etc/kubernetes/audit/>>>
+                                      <<<k8s-audit-policy.yaml
+    ...
+  ...
+  volumeMounts:
+    ...
+    - mountPath: /var/log/k8s
+      name: var-log-k8s
+      readOnly: false
+    - mountPath: /etc/kubernetes/audit
+      name: etc-kubernetes-audit
+      readOnly: true
+    ...
+  ...
+  volumes:
+    ...
+    - hostPath:
+      path: /var/log/k8s
+      type: DirectoryOrCreate
+      name: var-log-k8s
+    - hostPath:
+      path: /etc/kubernetes/audit
+      type: DirectoryOrCreate
+      name: etc-kubernetes-audit
+  ...
+
+status: {}
+
+==============================================================
+
+--- Check for changes ----------------------------------------
+
+$ kubectl get pods -n kube-system
+
+>>> kube-apiserver-cluster101-control-plane 1/1 Running 0 14s
+
+--- Check for logs -------------------------------------------
+
+$ docker exec cluster01-control-plane \
+  tail /var/log/k8s/audit.log
+
+>>> {"kind":"Event","apiVersion":"audit.k8s.io/v1","level"...
+
+\ 2>/dev/null | \
+  python3 -c 'import sys, yaml, json; >>>
+            <<<print(yaml.dump(json.loads(sys.stdin.read())))'
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+[ LECTURAS ]
+
+- https://github.com/liggitt/audit2rbac
+
+╰(*°▽°*)╯
+
+..............................................................
+
+
+
+
+
+
+
