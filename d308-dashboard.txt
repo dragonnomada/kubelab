@@ -47,7 +47,8 @@ $ docker exec -it cluster101-control-plane bash
                      -inkey ca.key -in ca.crt \
                      -out ca.p12 -name 'kube-admin'
 
-$ docker cp cluster304-control-plane:/etc/kubernetes/pki/ca.p12 .
+$ docker cp \
+  cluster101-control-plane:/etc/kubernetes/pki/ca.p12 ~
 
 $ ls
 
