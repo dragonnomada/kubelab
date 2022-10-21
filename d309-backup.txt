@@ -123,11 +123,15 @@ $ docker exec -it cluster101-control-plane bash
 
 /root# tar xzvf velero-v1.9.2-linux-amd64.tar.gz
 
-/root# sudo cp velero-v1.9.2-linux-amd64/velero /usr/local/bin
+/root# cp velero-v1.9.2-linux-amd64/velero /usr/local/bin
 
 /root# velero version
 
 --- Configurar MinIO Deployment -----------------------------
+
+[ LECTURAS ]
+
+- https://min.io
 
 /root# kubectl apply -f velero-v1.9.2-linux-amd64/examples/>>>
       <<<minio/00-minio-deployment.yaml minio-deployment.yaml
