@@ -1,0 +1,35 @@
+POD
+
+spec:
+  containers:
+    - name: ngix-pod
+      image: nginx
+      ports:
+        - containerPort: 80
+
+DEPLOYMENT
+
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: nginx-app
+  template:
+    metadata:
+      name: nginx-pod
+      labels:
+        app: nginx-app
+    spec:
+      - name: ngix-pod
+        image: nginx
+        ports:
+          - containerPort: 80
+
+SERVICE
+
+spec:
+  type: ClusterIP
+  selector:
+    [label]
+  ports:
+    ...
