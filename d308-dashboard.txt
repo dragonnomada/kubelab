@@ -1,0 +1,66 @@
+##############################################################
+# Kubernetes Lab                                         307 #
+# ---------------------------------------------------------- #
+# Alan Badillo Salas               dragonnomada123@gmail.com #
+# ---------------------------------------------------------- #
+# https://github.com/dragonnomada/kubelab           oct/2022 #
+##############################################################
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@                                                            @
+@    Kubernetes Dashboard                                    @
+@                                                            @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+[ LECTURAS ]
+
+- https://kubernetes.io/docs/tasks/access-application-cluster/
+  web-ui-dashboard/
+
+... Habilitar la auditación en el clúster ....................
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+--- Instalamos el dashboard ----------------------------------
+
+$ kubectl apply -f https://raw.githubusercontent.com/
+  kubernetes/dashboard/v2.6.1/aio/deploy/recommended.yaml
+
+--- Generamos el certificado de acceso -----------------------
+
+$ cat .kube/config | grep client-certificate-data: | \
+  awk '{print $2}' | base64 -d > kube.crt
+
+$ cat .kube/config | grep client-key-data: | \
+  awk '{print $2}' | base64 -d > kube.key
+
+$ openssl pkcs12 -export -clcerts -inkey kube.key \
+  -in kube.crt -out kube.p12 -name 'kube-admin'
+
+# Descarga el certificado kube.p12 e instalalo en el navegador
+
+--- Exponer el dashboard sobrre el puerto deseado ------------
+
+[1] $ kubectl port-forward -n kubernetes-dashboard \
+  service/kubernetes-dashboard 8080:443 --address=0.0.0.0
+
+--- Crear un token de acceso para test-sa con sus políticas --
+
+[2] $ kubectl create token test-sa
+
+--- Ejecutar un pod y monitorear el dashboard ----------------
+
+[2] $ kubectl run nginx-pod --image=nginx
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+(☞ﾟヮﾟ)☞
+
+..............................................................
+
+
+
+
+
+
+
