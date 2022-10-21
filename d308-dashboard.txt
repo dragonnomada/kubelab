@@ -37,6 +37,26 @@ $ cat .kube/config | grep client-key-data: | \
 $ openssl pkcs12 -export -clcerts -inkey kube.key \
   -in kube.crt -out kube.p12 -name 'kube-admin'
 
+~~~ KinD ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+$ docker exec -it cluster101-control-plane bash
+
+# cd /etc/kubernetes/pki/
+
+/etc/kubernetes/pki# openssl pkcs12 -export -clcerts \
+                     -inkey ca.key -in ca.crt \
+                     -out ca.p12 -name 'kube-admin'
+
+$ docker cp cluster304-control-plane:/etc/kubernetes/pki/ca.p12 .
+
+$ ls
+
+>>> ... ca.p12 ...
+
+* Descargar vía FTP el `ca.p12`
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 # Descarga el certificado kube.p12 e instalalo en el navegador
 
 --- Exponer el dashboard sobrre el puerto deseado ------------
