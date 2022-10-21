@@ -45,3 +45,8 @@ Miguel Arellano
 host-10	us-east5-b		
 10.202.0.4 (nic0)	34.162.26.201  (nic0)
 
+César
+
+host-11	us-east5-b		
+10.202.0.5 (nic0)	34.162.124.96  (nic0)
+
