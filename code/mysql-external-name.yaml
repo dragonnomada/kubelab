@@ -1,0 +1,9 @@
+kind: Service
+apiVersion: v1
+
+metadata:
+  name: mysql-dns
+
+spec:
+  type: ExternalName
+  externalName: mysql.miempresa.com

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+
+metadata:
+  name: token-generator-pod
+
+spec:
+  containers:
+    - name: token-container
+      image: dragonnomada/token-generator
+      ports:
+        - containerPort: 80

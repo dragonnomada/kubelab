@@ -1,0 +1,77 @@
+kind: Pod
+apiVersion: v1
+
+metadata:
+  name: token-dev-pod
+  labels:
+    app: token-dev-app
+
+spec:
+  containers:
+    - name: token-dev-container
+      image: dragonnomada/token-generator:dev
+      ports:
+        - containerPort: 80
+
+---
+
+kind: Service
+apiVersion: v1
+
+metadata:
+  name: token-dev-service
+
+spec:
+  type: ClusterIP
+  clusterIP: "10.96.3.1"
+  selector:
+    app: token-dev-app
+  ports:
+    - port: 80
+      targetPort: 80
+
+---
+
+kind: Pod
+apiVersion: v1
+
+metadata:
+  name: token-prod-pod
+  labels:
+    app: token-prod-app
+
+spec:
+  containers:
+    - name: token-prod-container
+      image: dragonnomada/token-generator:prod
+      ports:
+        - containerPort: 80
+
+---
+
+kind: Service
+apiVersion: v1
+
+metadata:
+  name: token-prod-service
+
+spec:
+  type: ClusterIP
+  clusterIP: "10.96.4.1"
+  selector:
+    app: token-prod-app
+  ports:
+    - port: 80
+      targetPort: 80
+
+---
+
+kind: Service
+apiVersion: v1
+
+metadata:
+  name: token-dns-service
+
+spec:
+  type: ExternalName
+  externalName: token.empresa.com

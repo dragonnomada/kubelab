@@ -1,0 +1,47 @@
+ALAN BADILLO (Host-0)
+
+host-0	us-east1-c		
+10.142.0.9 (nic0)	34.139.185.226  (nic0) 
+
+JBLANCO
+host-1	us-east1-c		
+10.142.0.2 (nic0)	35.237.227.68  (nic0) 	
+
+Angel Dominguez
+host-2	us-east1-c		
+10.142.0.3 (nic0)	104.196.32.219  (nic0) 	
+
+Juan Vega
+host-3	us-east1-c		
+10.142.0.4 (nic0)	34.75.95.94  (nic0) 	
+
+Yessica Lopez
+host-4	us-east1-c		
+10.142.0.5 (nic0)	34.73.144.228  (nic0) 	
+
+Eder
+host-5	us-east1-c		
+10.142.0.6 (nic0)	35.237.107.136  (nic0) 	
+
+CLAUREAN
+host-6	us-east1-c		
+10.142.0.7 (nic0)	35.229.30.130  (nic0) 	
+
+Pedro Olivares
+host-7	us-east1-c		
+10.142.0.8 (nic0)	35.227.69.103  (nic0) 	
+
+Lizeth Trujillo (VTCANTU)
+host-8	us-east5-b		
+10.202.0.2 (nic0)	34.162.56.69  (nic0) 	
+
+Luis Gerardo
+
+host-9	us-east5-b		
+10.202.0.3 (nic0)	34.162.133.159  (nic0) 	
+
+Miguel Arellano
+
+host-10	us-east5-b		
+10.202.0.4 (nic0)	34.162.26.201  (nic0)
+

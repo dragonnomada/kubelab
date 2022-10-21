@@ -1,0 +1,97 @@
+kind: Namespace
+apiVersion: v1
+
+metadata:
+  name: token-stack
+
+---
+
+kind: Deployment
+apiVersion: apps/v1
+
+# [ObjectMeta]
+# name
+# namespace
+metadata:
+  # kubectl get deployment(/s/deploy)
+  # kubectl describe deploy token-stack-deploy
+  # kubectl delete depploy token-stack-deploy
+  name: token-stack-deploy
+  namespace: token-stack
+
+#  [DeploymentSpec]
+#  replicas
+#! selector -> pod
+#! template -> podSpec
+spec:
+  replicas: 5
+  # [LabelSelector]
+  selector:
+    # label -> <key>: <value>
+    matchLabels:
+      pod: token-pod
+  # [PodTemplateSpec]
+  #! metadata
+  #! spec
+  template:
+    # [ObjectMeta]
+    # name
+    # labels <- selector::matchLabels
+    metadata:
+      name: token-pod
+      labels:
+        # label -> <key>: <value>
+        pod: token-pod
+    # [PodSpec]
+    # [containers -> containerSpec]
+    spec:
+      #  [ContainerSpec]
+      #! name
+      #  image
+      #  [ports -> containerPortSpec]
+      containers:
+        - name: token-container
+          image: dragonnomada/token-generator
+          # [ContainerPortSpec]
+          ports:
+            # DOCKERFILE -> EXPOSE
+            - containerPort: 80
+#             hostPort: 8080
+#           - containerPort: 9001
+#       - name: mysql-container
+#         image: mysql:5.7
+#         ports:
+#           - containerPort: 3306
+
+---
+
+kind: Service
+apiVersion: v1
+
+metadata:
+  name: token-service
+  namespace: token-stack
+
+# [ServiceSpec]
+# type 
+#   ClusterIP*    -> Internal IP   | SELECTOR |
+#   NodePort      +> External Port | SELECTOR | PODS | External HOST-PORT
+#   LoadBalencer  +> External IP   | SELECTOR | PODS | External LoadBalancing (MetalLB)
+#   ExternalName  +> External DNS  | -        | DNS  | External DNS HOST
+# selector
+# ports[]
+# * clusterIP | nodePort | externalName
+spec:
+  type: LoadBalancer
+  clusterIP: "10.96.40.1"
+  # <<simple>> -> * labels !!! SelectorSpec
+  selector:
+    pod: token-pod
+  # [ServicePort]
+  ports:
+    # port -> Exposed over service (ClusterIP/DNS/ExternalIP)
+    # targetPort -> Exposed over Pod (Some containerPort->hostPort)
+    # Ex. container:80->node:8080->cluster:5000
+    - port: 80
+      targetPort: 80
+      nodePort: 31555

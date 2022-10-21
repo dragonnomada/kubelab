@@ -1,0 +1,261 @@
+##############################################################
+# Kubernetes Lab                                         307 #
+# ---------------------------------------------------------- #
+# Alan Badillo Salas               dragonnomada123@gmail.com #
+# ---------------------------------------------------------- #
+# https://github.com/dragonnomada/kubelab           oct/2022 #
+##############################################################
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@                                                            @
+@    Kubernetes Backup Workloads                             @
+@                                                            @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+[ LECTURAS ]
+
+- https://discuss.kubernetes.io/t/backup-a-cluster-with-velero
+
+[ RECURSOS ]
+
+- https://github.com/vmware-tanzu/velero/releases
+
+... Respaldar el clúster .....................................
+
+El clúster está formado por los Workloads en ejecución y la
+base de datos ETCD.
+
+Para poder respaldar el clúster en su estado actual para
+cualquier desastre implica recuperar los nombres de espacios
+y objetos. También los certificados, controladores de ingress,
+balanceadores de carga y el API Server.
+
+... Respaldar a ETCD .........................................
+
+Kubernetes posee una herramienta llamada `etcdctl` con la que
+podremos respaldar la base de datos del clúster, mediante
+los certificados.
+
+Los primero es hacer hacer un respaldo de los certficados.
+
+%%% Respaldar los certificados %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+# Kubeadm
+
+$ cat .kube/config
+
+$ ls /etc/kubernetes/pki
+
+--- Copiar los certificados a la carpeta de backup -----------
+
+$ mkdir backup
+
+$ sudo cp -r /etc/kubernetes/pki backup
+
+--- Descargar y descomprimir etcdctl -------------------------
+
+[ RECURSOS ]
+
+- https://etcd.io/docs/v3.4/install/
+- https://github.com/etcd-io/etcd/releases/
+
+$ wget https://github.com/etcd-io/etcd/releases/download/>>>
+                      <<<v3.5.5/etcd-v3.5.5-linux-amd64.tar.gz
+
+$ tar xzvf etcd-v3.5.5-linux-amd64.tar.gz
+
+--- Crear un snapshot de la base de datos --------------------
+
+cd $ etcd-v3.5.5-linux-amd64
+
+$ sudo ./etcdctl snapshot save ~/backup/etcd-snapshot.db \
+  --endpoints=https://127.0.0.1:2379 \
+  --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+  --cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt \
+  --key=/etc/kubernetes/pki/etcd/healthcheck-client.key
+
+>>> ...
+>>> Snapshot saved at ~/backup/etcd-snapshot.db
+
+~/etcd-v3.5.5-linux-amd64$ cd ~/backup/
+
+~/backup$ ls
+
+>>> etcd-snapshot.db  pki
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+... Uso de Velero ............................................
+
+[ LECTURAS ]
+
+- https://velero.io
+
+  """ Velero is an open source tool to safely backup and 
+    " restore, perform disaster recovery, and migrate 
+    " Kubernetes cluster resources and persistent volumes.
+
+Velero es una herramienta de código abierto para poder
+hacer respaldos en Kubernetes.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+--- Descargar Velero -----------------------------------------
+
+[ LECTURAS ]
+
+- https://velero.io/docs/main/contributions/minio/
+
+[ RECURSOS ]
+
+- https://github.com/vmware-tanzu/velero/releases/tag/v1.9.2
+
+$ docker exec -it cluster101-control-plane bash
+
+# apt update
+
+# apt install wget
+
+# cd /root
+
+/root# wget https://github.com/vmware-tanzu/velero/releases/>>>
+           <<<download/v1.9.2/velero-v1.9.2-linux-amd64.tar.gz
+
+/root# tar xzvf velero-v1.9.2-linux-amd64.tar.gz
+
+/root# sudo cp velero-v1.9.2-linux-amd64/velero /usr/local/bin
+
+/root# velero version
+
+--- Configurar MinIO Deployment -----------------------------
+
+/root# kubectl apply -f velero-v1.9.2-linux-amd64/examples/>>>
+      <<<minio/00-minio-deployment.yaml minio-deployment.yaml
+
+/root# kubectl get po,rs,deploy,svc,no,ep -n velero
+
+>>> minio   ClusterIP   ...    9000/TCP   ...
+
+--- Crear las credenciales de Velero para MinIO --------------
+
+/root# nano credentials-velero
+
+=== credentials-velero =======================================
+
+[default]
+aws_access_key_id = minio
+aws_secret_access_key = minio123
+
+==============================================================
+
+--- Instalar Velero para MinIO -------------------------------
+
+/root# velero install \
+    --provider aws \
+    --plugins velero/velero-plugin-for-aws:v1.2.1 \
+    --bucket velero \
+    --secret-file ./credentials-velero \
+    --use-volume-snapshots=false \
+    --backup-location-config region=minio,s3ForcePathStyle=>>>
+                  <<<"true",s3Url=http://minio.velero.svc:9000
+
+>>> Velero is installed! ⛵ ...
+    ... Use 'kubectl logs deployment/velero -n velero'
+
+/root# kubectl logs deployment/velero -n velero
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+... Crear una prueba de respaldo .............................
+
+Ahora podemos crear pruebas de respaldo con Velero.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+--- Realizar el respaldo de app=nginx-app --------------------
+
+/root# kubectl apply -f velero-v1.9.2-linux-amd64/examples/>>>
+                                        <<<nginx-app/base.yaml
+
+/root# velero backup create nginx-backup --selector app=nginx
+
+>>> Backup request "nginx-backup" submitted successfully.
+>>> Run `velero backup describe nginx-backup` or 
+           `velero backup logs nginx-backup` for more details.
+
+/root# velero backup describe nginx-backup
+
+>>> Phase:  Completed
+
+~~~ Programar un backu diario ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# velero schedule create nginx-daily \
+  --schedule="0 1 * * *" --selector app=nginx
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+... Generar una catástrofe sobre el clúster ..................
+
+Una vez respaldado provocaremos una catástrofe.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+--- Inspeccionar los recursos de nginx-example ---------------
+
+# kubectl get po,rs,deploy,svc,no,ep -n nginx-example
+
+>>> pod/nginx-deployment...
+
+--- Provocar una catástrofe sobre nginx-example --------------
+
+# kubectl delete namespace nginx-example
+
+>>> namespace "nginx-example" deleted
+
+--- Inspeccionar los recursos de nginx-example ---------------
+
+# kubectl get po,rs,deploy,svc,no,ep -n nginx-example
+
+>>> [[ No hay pods, ni deployments ]]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+... Restaurar un respaldado con Velero .......................
+
+Ahora que el clúster ha sido dañado, procederemos a restaurar 
+el respaldo.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$ velero restore create --from-backup nginx-backup
+
+>>> Restore request "nginx-backup-20221021134043" ...
+>>> Run `velero restore describe nginx-backup-20221021134043` 
+      or `velero restore logs nginx-backup-20221021134043` ...
+
+--- Verificamos el estado del respaldo -----------------------
+
+$ velero restore describe nginx-backup-20221021134043
+
+>>> Phase:                       Completed
+
+--- Inspeccionar los recursos de nginx-example ---------------
+
+# kubectl get po,rs,deploy,svc,no,ep -n nginx-example
+
+>>> pod/nginx-deployment...
+
+* Los nombres de los Pods se conservan
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+( ´･･)ﾉ(._.`)
+
+..............................................................
+
+
+
+
+
+
+

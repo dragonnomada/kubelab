@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: token-deploy-jenkins
+
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: token-app-jenkins
+  template:
+    metadata:
+      name: token-pod-jenkins
+      labels:
+        app: token-app-jenkins
+    spec:
+      serviceAccountName: jenkins
+      containers:
+        - name: token-container-jenkins
+          image: dragonnomada/token-generator
+          ports:
+            - containerPort: 80

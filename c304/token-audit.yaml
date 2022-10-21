@@ -1,0 +1,11 @@
+kind: Policy
+apiVersion: audit.k8s.io/v1beta1
+
+rules:
+  - level: Request
+    userGroups: ["system:serviceaccount:token-stack:bot-sa"]
+    verbs: ["get","list"]
+    resources:
+      - group: "" # core
+        resources: ["pods", "pods/log"]
+    omitStages: []
