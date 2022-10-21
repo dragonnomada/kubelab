@@ -1,0 +1,27 @@
+API SERVER
+
+Forma en la que lanzamos peticiones
+al clúster (control-plane) para
+hacer operaciones sobre los recursos
+
+Accesos globales:
+
+  - Interno: kubectl (certificado)
+  - Externo: https   (certificado/token)
+  - Dashboard: https (certificado/token)
+
+Autenticación          | Autorización
+   ACCEDER             |   ACCIONAR
+--------------------------------------------------------
+ MUSEO->ANÓNIMO     NO |      -
+ MUSEO->TURISTA     SI | TOMAR-FOTO|APRETAR-BOTONES
+ MUSEO->E.LIMPIEZA  SI | ABRIR-BODEGA|MOVER-PIEZA
+ MUSEO->E.ADMIN     SI | EXHIBIR-PIEZA|RESGUARDAR-PIEZA
+
+Kubernetes <-x- Usuarios normales (terceros)
+           -v-> Certificado / Service Account
+
+
+
+
+

@@ -1,0 +1,31 @@
+docker exec -it cluster304-control-plane mkdir -p /etc/kubernetes/audit
+
+docker cp k8s-audit-policy.yaml cluster304-control-plane:/etc/kubernetes/audit
+
+docker exec -it cluster304-control-plane mkdir /var/log/k8s
+
+docker exec -it cluster304-control-plane bash
+
+nano /etc/kubernetes/manifests/kube-apiserver.yaml
+
+    - --audit-log-path=/var/log/k8s/audit.log
+    - --audit-log-maxage=1
+    - --audit-log-maxbackup=10
+    - --audit-log-maxsize=10
+    - --audit-policy-file=/etc/kubernetes/audit/k8s-audit-policy.yaml
+
+    - mountPath: /var/log/k8s
+      name: var-log-k8s
+      readOnly: false
+    - mountPath: /etc/kubernetes/audit
+      name: etc-kubernetes-audit
+      readOnly: true
+
+  - hostPath:
+      path: /var/log/k8s
+      type: DirectoryOrCreate
+    name: var-log-k8s
+  - hostPath:
+      path: /etc/kubernetes/audit
+      type: DirectoryOrCreate
+    name: etc-kubernetes-audit

@@ -1,0 +1,7 @@
+7 Aplicación (HTTP -> INGRESS -> NGINX CONTROLLER)
+6 Presentación
+5 Sesión
+4 Transporte (TCP/UDP -> METALLB)
+3 RED (IP -> DNS)
+2 ENLACE (MAC -> IPv4 IPv6 -> IPTABLES IPVS)
+1 FÍSICA (ROUTER -> ETH0)
