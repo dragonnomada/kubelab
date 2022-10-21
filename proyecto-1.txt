@@ -1,0 +1,18 @@
+Proyecto 1 - Generar un Dashboard de Kubernetes para administrar el clúster
+
+- Solicitar un Host
+- Instalar KinD (c101-kind-install.txt)
+- Instalar el Dashboard (d308-dashboard.txt)
+- Descargar e instalar el certificado .p12 (d308-dashboard.txt)
+- Port-forward del dashboard sobre la IP-Pública (d308-dashboard.txt)
+- Generar el ServiceAccount admin-cluster (d306-rbac.txt)
+- Generar el ClusterRoleBinding admin-cluster -> cluster-admin (d306-rbac.txt)
+- Generar un token de acceso para admin-cluster (d306-rbac.txt)
+- Ingresar al Dashboard con el token de admin-cluster
+
+- Manipular el dashboard:
+    * Crear pods/deployments
+    * Escalar deployments
+    * Inspeccionar pods/nodes
+    * Generar un ServiceAccount nuevo e ingresar con él
+
